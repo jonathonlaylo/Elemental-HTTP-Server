@@ -22,22 +22,14 @@ const resourceMapping = {
 };
 
 const server = http.createServer( (req, res) => {
-  if(req.url === '/'){
-    req.url = '/index.html';
-  }
+  if (req.method === "GET"){
+    if(req.url === '/'){
+      req.url = '/index.html';
+    }
 
-  console.log("req.url", req.url);
-  console.log("req.method", req.method);
-  console.log("req.headers", req.headers);
-
-  let reqBody = '';
-  req.setEncoding('utf8');
-  req.on('data', (chunk) => {
-    reqBody += chunk;
-  });
-  req.on('end', () => {
-    // reqBody is complete, handle request!
-    console.log(reqBody);
+    console.log("req.url", req.url);
+    console.log("req.method", req.method);
+    console.log("req.headers", req.headers);
 
     fs.readFile(resourceMapping[req.url] || '', (err, content) => {
       if(err){
@@ -47,22 +39,20 @@ const server = http.createServer( (req, res) => {
       }
       sendContent(res, content);
     });
-  });
+  }
+  if (req.method === "POST"){
+    let reqBody = '';
+    req.setEncoding('utf8');
+    req.on('data', (chunk) => {
+      reqBody += chunk;
+    });
+    req.on('end', () => {
+      console.log('reqBody',reqBody);
 
-  // fs.readFile('./public/helium.html', (err, content) =>{
-  //   if(err){
-  //     res.statusCode = 500;
-  //     res.write("Server fault occurred");
-  //     res.end();
-  //     return;
-  //   }
-  //   res.setHeader('Content-Type', 'text/plain');
-  //   res.write(content);
-  //   res.end();
-  // });
+    });
+  }
 
 });
-
 
 
 server.listen(PORT, () => {
