@@ -9,8 +9,13 @@ const fileNotFoundErrorHandler = (res) => {
   res.end('Server is broken');
 };
 
+let contentTypes = {
+  '.html' : 'text/html',
+  '.css' : 'text/css'
+};
+
 const sendContent = (res, content) => {
-  res.setHeader('Content-Type', 'text/plain');
+  // res.setHeader('Content-Type', 'text/html');
   res.write(content);
   res.end();
 };
@@ -19,18 +24,25 @@ const resourceMapping = {
   '/helium.html' : './public/helium.html',
   '/hydrogen.html' : './public/hydrogen.html',
   '/index.html' : './public/index.html',
-  '/styles.css' : "./public/css/styles.css"
+  '/css/styles.css' : "./public/css/styles.css",
+  '/boron.html' : './public/boron.html'
 };
 
 const server = http.createServer( (req, res) => {
-  if (req.method === "GET"){
+  // if (req.method === "GET"){
+
     if(req.url === '/'){
       req.url = '/index.html';
+    } else if(req.url.split(".")[1] === "css"){
+      console.log("CSS", req.url);
+      req.url ="/css/styles.css";
+      type = "css";
     }
-
     console.log("req.url", req.url);
     console.log("req.method", req.method);
     console.log("req.headers", req.headers);
+
+  if (req.method === "GET"){
 
     fs.readFile(resourceMapping[req.url] || '', (err, content) => {
       if(err){
@@ -38,9 +50,12 @@ const server = http.createServer( (req, res) => {
         sendContent(res, 'Resource not found');
         return;
       }
+
       sendContent(res, content);
     });
+
   }
+
   if (req.method === "POST"){
     let reqBody = '';
     req.setEncoding('utf8');
@@ -63,11 +78,25 @@ const server = http.createServer( (req, res) => {
   <h2>${reqParsedData.elementSymbol}</h2>
   <h3>Atomic number ${reqParsedData.elementAtomicNumber}</h3>
   <p>${reqParsedData.elementDescription}</p>
-  <p><a hred="/">back</a></p>
+  <p><a href="/">back</a></p>
 </body>
 </html>`;
       console.log(fileHTML);
 
+    fs.writeFile(fileName, fileHTML, (err)=>{
+         if (err){
+            res.end(err.message);
+
+          }else{
+
+          let statusCode = 200;
+
+          res.setHeader(statusCode, {
+            'Content-Type': contentTypes,
+          });
+          res.end(JSON.stringify({'success':true}));
+        }
+      });
 
     });
     // req.on('end', () => {
