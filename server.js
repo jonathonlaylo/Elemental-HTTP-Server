@@ -29,8 +29,6 @@ const resourceMapping = {
 };
 
 const server = http.createServer( (req, res) => {
-  // if (req.method === "GET"){
-
     if(req.url === '/'){
       req.url = '/index.html';
     } else if(req.url.split(".")[1] === "css"){
@@ -43,17 +41,14 @@ const server = http.createServer( (req, res) => {
     console.log("req.headers", req.headers);
 
   if (req.method === "GET"){
-
     fs.readFile(resourceMapping[req.url] || '', (err, content) => {
       if(err){
         res.statusCode = 404;
         sendContent(res, 'Resource not found');
         return;
       }
-
       sendContent(res, content);
     });
-
   }
 
   if (req.method === "POST"){
@@ -83,29 +78,23 @@ const server = http.createServer( (req, res) => {
 </html>`;
       console.log(fileHTML);
 
-    fs.writeFile(fileName, fileHTML, (err)=>{
-         if (err){
-            res.end(err.message);
-
-          }else{
-
+      fs.writeFile(fileName, fileHTML, (err)=>{
+        if (err){
+          res.end(err.message);
+        }else{
           let statusCode = 200;
-
           res.setHeader(statusCode, {
             'Content-Type': contentTypes,
           });
           res.end(JSON.stringify({'success':true}));
         }
       });
-
     });
     // req.on('end', () => {
     //   console.log('reqBody',reqBody.toString());
     // });
   }
-
 });
-
 
 server.listen(PORT, () => {
   console.log("server is listening on port", PORT);
